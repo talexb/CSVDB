@@ -4,9 +4,13 @@ use 5.006;
 use strict;
 use warnings;
 
+use Carp;
+use autodie;
+use Text::CSV;
+
 =head1 NAME
 
-CSVDB - The great new CSVDB!
+CSVDB - Access a CSV file like a database
 
 =head1 VERSION
 
@@ -19,13 +23,23 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
+Specify a CSV file, then access it like a database table.
 
 Perhaps a little code snippet.
 
     use CSVDB;
 
-    my $foo = CSVDB->new();
+    my $shapes = CSVDB->new( 'shapes.csv' );
+    my $sides = $shapes->select( fields => 'sides' );
+
+    #  The sides arrayref now has a list of the shapes' sides.
+
+    my $smaller_sides =
+      $shapes->select( fields => 'sides', where => 'sides <= 12' );
+
+    #  The smaller_sides arrayref ow has a list of shapes' sides that are less
+    #  than or equal to 12.
+
     ...
 
 =head1 EXPORT
@@ -39,14 +53,33 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =cut
 
-sub function1 {
-}
+sub new
+{
+    my ( $class, $filename ) = @_;
+    defined $filename or croak "Must specify filename";
 
-=head2 function2
+    my $csv = Text::CSV->new ({ binary => 1, auto_diag => 1 });
+    open ( my $fh, '<', $filename );
 
-=cut
+    my $self = { filename => $filename };
 
-sub function2 {
+    my $first_line = 1;
+    while ( my $row = $csv->getline ($fh)) {
+
+        if ( $first_line ) {
+
+            $self->{cnames} = $row;
+            $first_line = 0;
+
+        } else {
+
+            push ( @{ $self->{ data } }, $row );
+        }
+    }
+    close ( $fh );
+
+    bless $self, $class;
+    return $self;
 }
 
 =head1 AUTHOR
