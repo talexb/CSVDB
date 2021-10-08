@@ -6,6 +6,7 @@ use warnings;
 
 use Test::More;
 use Try::Tiny;
+use FindBin qw/$Bin/;   #  For test file location
 
 use CSVDB;
 
@@ -18,6 +19,9 @@ use CSVDB;
 
         ok( 1, 'Opening without a file was caught' );
     };
+
+    my $shapes = CSVDB->new ( "$Bin/Shapes-2021-1008.csv" );
+    ok ( defined $shapes, 'Test file opened' );
 
     done_testing;
 }
