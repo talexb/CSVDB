@@ -11,6 +11,8 @@ use FindBin qw/$Bin/;   #  For test file location
 use CSVDB;
 
 {
+    #  Create an object without a filename, and make sure it fails.
+
     try {
 
         my $no_file = CSVDB->new();
@@ -20,10 +22,12 @@ use CSVDB;
         ok( 1, 'Opening without a file was caught' );
     };
 
+    #  Create an object using our test file ..
+
     my $shapes = CSVDB->new ( "$Bin/Shapes-2021-1008.csv" );
     ok ( defined $shapes, 'Test file opened' );
 
-    #  Just do a select on everything, so we can verify the data.
+    #  .. and just do a select on everything, so we can verify the data.
 
     my $data = $shapes->select;
     is ( scalar ( @{ $data } ), 7, 'Number of columns is correct' );

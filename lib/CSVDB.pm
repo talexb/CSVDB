@@ -58,6 +58,8 @@ sub new
     my ( $class, $filename ) = @_;
     defined $filename or croak "Must specify filename";
 
+    #  Text::CSV is doing all of the heavy lifting here.
+
     my $csv = Text::CSV->new ({ binary => 1, auto_diag => 1 });
     open ( my $fh, '<', $filename );
 
@@ -65,6 +67,9 @@ sub new
 
     my $first_line = 1;
     while ( my $row = $csv->getline ($fh)) {
+
+        #  We're assuming that the first line will be the column headers (i.e.,
+        #  field names), and all subsequent lines will be data.
 
         if ( $first_line ) {
 
