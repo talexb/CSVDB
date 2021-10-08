@@ -82,6 +82,20 @@ sub new
     return $self;
 }
 
+sub select
+{
+    my ( $self, %args )  = @_;
+
+    #  When there are no fields or clauses, we just return everything.
+
+    if ( !exists ( $args{ fields } ) && !exists $args{ where } ) {
+
+        return ( $self->{ data } );
+    }
+
+    die "Not implemented";
+}
+
 =head1 AUTHOR
 
 T. Alex Beamish, C<< <talexb at gmail.com> >>
