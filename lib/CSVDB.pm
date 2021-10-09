@@ -74,6 +74,24 @@ sub new
     return $self;
 }
 
+sub new_no_header
+{
+    my ( $class, $filename ) = @_;
+    defined $filename or croak "Must specify filename";
+
+    $errors = [];
+
+    open ( my $fh, '<', $filename );
+    my $self = { filename => $filename };
+
+    _load ( $self, $fh, 0 );
+
+    close ( $fh );
+
+    bless $self, $class;
+    return $self;
+}
+
 #  This loads the contents of the CSV into the object.
 
 sub _load
@@ -106,9 +124,11 @@ sub select
 
     $errors = [];
 
-    #  When there are no fields, clauses or limits, we just return everything.
+    #  When there are no fields, field numbers, clauses or limits, we just
+    #  return everything.
 
     if (   !exists( $args{fields} )
+        && !exists( $args{field_num} )
         && !exists $args{where}
         && !exists $args{limit} )
     {
@@ -116,24 +136,42 @@ sub select
         return ( $self->{data} );
     }
 
-    #  There are field names? Get the offsets for each field name (aka column
-    #  names or just cnames), and return the data for those column offsets.
-
     my @field_offsets;
     my @errors;
 
-    my $off = 0;    #  Maps the column names to column number.
-    my %cnames = map { $_ => $off++ } @{$self->{ cnames }};
+    #  There are field names? Get the offsets for each field name (aka column
+    #  names or just cnames), and return the data for those column offsets.
 
-    foreach my $name ( @{ $args{ fields } } ) {
+    if ( exists ( $args{fields} ) ) {
 
-        if ( exists $cnames{$name} ) {
+        my $off = 0;    #  Maps the column names to column number.
+        my %cnames = map { $_ => $off++ } @{$self->{ cnames }};
 
-            push( @field_offsets, $cnames{$name} );
+        foreach my $name ( @{ $args{ fields } } ) {
 
-        } else {
+            if ( exists $cnames{$name} ) {
 
-            push( @errors, "Field $name not found in table" );
+                push( @field_offsets, $cnames{$name} );
+
+            } else {
+
+                push( @errors, "Field $name not found in table" );
+            }
+        }
+    }
+
+    elsif ( exists ( $args{ field_num } ) ) {
+
+        foreach my $field_num ( @{ $args{ field_num } } ) {
+
+            if ( $field_num > scalar ( @{ $self->{ data }->[0] } ) ) {
+
+                push ( @errors, "Field $field_num not found in table" );
+
+            } else {
+
+                push ( @field_offsets, $field_num-1 );
+            }
         }
     }
 
@@ -166,13 +204,27 @@ sub select
     #  for now.) (Also, order by needs to know if we're doing alpha sorting
     #  using cmp or numeric sorting using <=> -- hence order_by_alpha.)
 
-    $off = 0;   #  Maps the output field names to offset.
-    my %onames = map { $_ => $off++ } @{ $args{ fields } };
+    if ( exists( $args{fields} ) ) {
 
-    if ( exists $args{ order_by_alpha } ) {
+        my $off    = 0;    #  Maps the output field names to offset.
+        my %onames = map { $_ => $off++ } @{ $args{fields} };
 
-        my $offset = $onames{ $args{ order_by_alpha } };
-        @data = sort { $a->[ $offset ] cmp $b->[ $offset ] } @data;
+        if ( exists $args{order_by_alpha} ) {
+
+            #  TODO: Check that this is a valid field name.
+            my $offset = $onames{ $args{order_by_alpha} };
+            @data = sort { $a->[$offset] cmp $b->[$offset] } @data;
+        }
+    }
+
+    elsif ( exists ( $args{ field_num } ) ) {
+
+        if ( exists $args{order_by_alpha} ) {
+
+            #  TODO: Check that this is a valid field number.
+            my $offset = $args{order_by_alpha} - 1;
+            @data = sort { $a->[$offset] cmp $b->[$offset] } @data;
+        }
     }
 
     return ( \@data );
