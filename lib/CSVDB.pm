@@ -112,14 +112,14 @@ sub select
     my @field_offsets;
     my @errors;
 
-    my $off = 0;
-    my %field_names = map { $_ => $off++ } @{$self->{ cnames }};
+    my $off = 0;    #  Maps the column names to column number.
+    my %cnames = map { $_ => $off++ } @{$self->{ cnames }};
 
     foreach my $name ( @{ $args{ fields } } ) {
 
-        if ( exists $field_names{$name} ) {
+        if ( exists $cnames{$name} ) {
 
-            push( @field_offsets, $field_names{$name} );
+            push( @field_offsets, $cnames{$name} );
 
         } else {
 
@@ -150,6 +150,19 @@ sub select
 
             last if ( --$limit == 0 );
         }
+    }
+
+    #  Is the data supposed to be sorted? (Just handle sorted a single field
+    #  for now.) (Also, order by needs to know if we're doing alpha sorting
+    #  using cmp or numeric sorting using <=> -- hence order_by_alpha.)
+
+    $off = 0;   #  Maps the output field names to offset.
+    my %onames = map { $_ => $off++ } @{ $args{ fields } };
+
+    if ( exists $args{ order_by_alpha } ) {
+
+        my $offset = $onames{ $args{ order_by_alpha } };
+        @data = sort { $a->[ $offset ] cmp $b->[ $offset ] } @data;
     }
 
     return ( \@data );

@@ -6,6 +6,7 @@ use warnings;
 
 use Test::More;
 use FindBin qw/$Bin/;   #  For test file location
+use Clone qw/clone/;
 
 use CSVDB;
 
@@ -64,6 +65,15 @@ use CSVDB;
         my $set = $shapes->select( limit => $limit );
         is ( scalar ( @{$set} ), $limit, "Got just $limit rows" );
     }
+
+    #  Test order by alpha. We clone the data so we can sort the copy without
+    #  affecting the original data.
+
+    my $alpha_order = $shapes->select( fields => [ qw/name/ ], order_by_alpha => 'name' );
+    my $alpha_copy = clone ( $alpha_order );
+    $alpha_copy = [ map { [ $_ ] } sort { $a cmp $b } map { $_->[0] } @{$alpha_copy} ];
+
+    is_deeply ( $alpha_order, $alpha_copy, 'Data was sorted correctly' );
 
     done_testing;
 }
