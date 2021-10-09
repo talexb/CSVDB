@@ -96,11 +96,14 @@ sub select
 
     $errors = [];
 
-    #  When there are no fields or clauses, we just return everything.
+    #  When there are no fields, clauses or limits, we just return everything.
 
-    if ( !exists ( $args{ fields } ) && !exists $args{ where } ) {
+    if (   !exists( $args{fields} )
+        && !exists $args{where}
+        && !exists $args{limit} )
+    {
 
-        return ( $self->{ data } );
+        return ( $self->{data} );
     }
 
     #  There are field names? Get the offsets for each field name (aka column
@@ -133,13 +136,20 @@ sub select
         return undef;
     }
 
-    #  Collect the data and return it.
+    #  Collect the data and return it. If there's a limit, do that.
 
     my @data;
+    my $limit = 0;
 
-    foreach my $row ( @{ $self->{ data } } ) {
+    if ( exists $args{limit} ) { $limit = $args{limit}; }
 
-        push ( @data, [ map { $row->[ $_ ] } @field_offsets ] );
+    foreach my $row ( @{ $self->{data} } ) {
+
+        push( @data, [ map { $row->[$_] } @field_offsets ] );
+        if ( $limit ) {
+
+            last if ( --$limit == 0 );
+        }
     }
 
     return ( \@data );

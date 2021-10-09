@@ -57,5 +57,13 @@ use CSVDB;
     is_deeply( $explicit_all_rows, $all_rows,
         'Match for implicit and explicit rows' );
 
+    #  Test limit parameter.
+
+    foreach my $limit ( 1..5 ) {
+
+        my $set = $shapes->select( limit => $limit );
+        is ( scalar ( @{$set} ), $limit, "Got just $limit rows" );
+    }
+
     done_testing;
 }
