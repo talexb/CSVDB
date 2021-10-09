@@ -103,8 +103,8 @@ sub select
         return ( $self->{ data } );
     }
 
-    #  There are fields? Get the offsets for each field, and return the data
-    #  for those offsets.
+    #  There are field names? Get the offsets for each field name (aka column
+    #  names or just cnames), and return the data for those column offsets.
 
     my @field_offsets;
     my @errors;
@@ -124,7 +124,7 @@ sub select
         }
     }
 
-    #  If we were asked for fields that were not found, report that error and
+    #  If any of the fields we were asked for were not found, report that error and
     #  return nothing.
 
     if ( @errors ) {
@@ -132,6 +132,8 @@ sub select
         $errors = \@errors;
         return undef;
     }
+
+    #  Collect the data and return it.
 
     my @data;
 
