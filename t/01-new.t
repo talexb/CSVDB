@@ -1,4 +1,4 @@
-#!perl -T
+#!perl
 
 use 5.006;
 use strict;
@@ -7,6 +7,8 @@ use warnings;
 use Test::More;
 use Try::Tiny;
 use FindBin qw/$Bin/;   #  For test file location
+
+use lib "$Bin/../lib";
 
 use CSVDB;
 
