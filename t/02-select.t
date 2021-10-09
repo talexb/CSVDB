@@ -48,5 +48,14 @@ use CSVDB;
     ok ( !defined $data, 'Got null result for bad field name' );
     like ( $CSVDB::errors->[0], qr/Field \w+ not found/, 'Got a good error message' );
 
+    #  Hmm .. let's explicitly ask for all columns .. should get the same
+    #  content as when we ask for everything.
+
+    my $all_rows          = $shapes->select;
+    my $explicit_all_rows = $shapes->select( fields => [qw/sides name/] );
+
+    is_deeply( $explicit_all_rows, $all_rows,
+        'Match for implicit and explicit rows' );
+
     done_testing;
 }
