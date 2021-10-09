@@ -20,30 +20,25 @@ use CSVDB;
 
     #  Get data from each of the fields ..
 
-# TODO:
-#   {
-#       local $TODO = 'Under development';
+    foreach my $field (qw/sides name/) {
 
-        foreach my $field (qw/sides name/) {
+        my $data = $shapes->select( fields => [$field] );
+        ok ( defined $data, 'Got a result' );
 
-            my $data = $shapes->select( fields => [$field] );
-            ok ( defined $data, 'Got a result' );
+        is( scalar( @{$data} ), 7, "Field count correct for $field" );
 
-            is( scalar( @{$data} ), 7, "Field count correct for $field" );
+        foreach my $e ( @{$data} ) {
 
-            foreach my $e ( @{$data} ) {
+            if ( $field eq 'sides' ) {
 
-                if ( $field eq 'sides' ) {
+                like( $e->[0], qr/^\d+$/, 'First column is a number' );
 
-                    like( $e->[0], qr/^\d+$/, 'First column is a number' );
+            } elsif ( $field eq 'name' ) {
 
-                } elsif ( $field eq 'name' ) {
-
-                    like( $e->[0], qr/^\w+$/, 'Second column is text' );
-                }
+                like( $e->[0], qr/^\w+$/, 'Second column is text' );
             }
         }
-#   }
+    }
 
     #  .. and then try getting data from a field that doesn't exist.
 
