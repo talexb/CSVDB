@@ -20,6 +20,7 @@ Version 0.01
 
 our $VERSION = '0.01';
 
+our $errors;    #  This is an array_ref.
 
 =head1 SYNOPSIS
 
@@ -58,6 +59,8 @@ sub new
     my ( $class, $filename ) = @_;
     defined $filename or croak "Must specify filename";
 
+    $errors = [];
+
     #  Text::CSV is doing all of the heavy lifting here.
 
     my $csv = Text::CSV->new ({ binary => 1, auto_diag => 1 });
@@ -91,6 +94,8 @@ sub select
 {
     my ( $self, %args )  = @_;
 
+    $errors = [];
+
     #  When there are no fields or clauses, we just return everything.
 
     if ( !exists ( $args{ fields } ) && !exists $args{ where } ) {
@@ -98,7 +103,44 @@ sub select
         return ( $self->{ data } );
     }
 
-    die "Not implemented";
+    #  There are fields? Get the offsets for each field, and return the data
+    #  for those offsets.
+
+    my @field_offsets;
+    my @errors;
+
+    my $off = 0;
+    my %field_names = map { $_ => $off++ } @{$self->{ cnames }};
+
+    foreach my $name ( @{ $args{ fields } } ) {
+
+        if ( exists $field_names{$name} ) {
+
+            push( @field_offsets, $field_names{$name} );
+
+        } else {
+
+            push( @errors, "Field $name not found in table" );
+        }
+    }
+
+    #  If we were asked for fields that were not found, report that error and
+    #  return nothing.
+
+    if ( @errors ) {
+
+        $errors = \@errors;
+        return undef;
+    }
+
+    my @data;
+
+    foreach my $row ( @{ $self->{ data } } ) {
+
+        push ( @data, [ map { $row->[ $_ ] } @field_offsets ] );
+    }
+
+    return ( \@data );
 }
 
 =head1 AUTHOR
