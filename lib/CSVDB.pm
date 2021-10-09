@@ -54,6 +54,8 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =cut
 
+#  Object constructor.
+
 sub new
 {
     my ( $class, $filename ) = @_;
@@ -61,33 +63,41 @@ sub new
 
     $errors = [];
 
+    open ( my $fh, '<', $filename );
+    my $self = { filename => $filename };
+
+    _load ( $self, $fh, 1 );
+
+    close ( $fh );
+
+    bless $self, $class;
+    return $self;
+}
+
+#  This loads the contents of the CSV into the object.
+
+sub _load
+{
+    my ( $self, $fh, $header_present ) = @_;
+
     #  Text::CSV is doing all of the heavy lifting here.
 
     my $csv = Text::CSV->new ({ binary => 1, auto_diag => 1 });
-    open ( my $fh, '<', $filename );
-
-    my $self = { filename => $filename };
-
-    my $first_line = 1;
     while ( my $row = $csv->getline ($fh)) {
 
         #  We're assuming that the first line will be the column headers (i.e.,
         #  field names), and all subsequent lines will be data.
 
-        if ( $first_line ) {
+        if ( $header_present ) {
 
             $self->{cnames} = $row;
-            $first_line = 0;
+            $header_present = 0;
 
         } else {
 
             push ( @{ $self->{ data } }, $row );
         }
     }
-    close ( $fh );
-
-    bless $self, $class;
-    return $self;
 }
 
 sub select
