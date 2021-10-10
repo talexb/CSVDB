@@ -7,15 +7,22 @@ use warnings;
 
 use Term::ReadLine;
 
+use CSVDB;
+
 my $base_prompt = 'csvdb > ';
 my $prompt = $base_prompt;      #  Might show currently loaded file?
 
 my $done = 0;
+my $table;
 
 my %cmds = (
     'q' => { exec => sub { $done = 1; },  short => 'Quit csvdb command line' },
     'h' => { exec => sub { help(); },     short => 'Show help' },
     'o' => { exec => sub { &open_file; }, short => 'Open CSV file' },
+);
+
+my %sql = (
+    'select' => { exec => sub { &select; }, short => 'Select records' },
 );
 
 {
@@ -33,9 +40,18 @@ my %cmds = (
         my @words = split( / /, $input );
         my $cmd = shift @words;
 
+        #  We're dealing with two things here .. single letter commands (listed
+        #  above in the cmds hash) and actual SQL operations (list in the sql
+        #  hash). If they're not in either of the hashes, it's a bad command.
+
         if ( exists $cmds{ $cmd } ) {
 
             &{ $cmds{ $cmd }->{ exec } }( [ @words ] );
+        }
+
+        elsif ( exists $sql{ $cmd } ) {
+
+            &{ $sql{ $cmd }->{ exec } }( [ @words ] );
 
         } else {
 
@@ -66,9 +82,27 @@ sub open_file
     if ( -e $filename ) {
 
         print "INFO: Hey, $filename exists! Cool.\n";
+        $table = CSVDB->new ( $filename );
 
-    } else {
+        if ( defined $table ) {
 
-        print "Warn: Ugh, the file $filename doesn't exist.\n";
+            print "INFO: Cool, object successfully created.\n";
+
+        } else {
+
+            print "ERROR: Ugh, problems: " . join ( "\n", @CSVDB::errors ) . "\n";
+        }
+    }
+}
+
+sub select
+{
+    my ( @params ) = @_;
+
+    my $result = $table->select ( fields => @params );
+
+    foreach my $row ( @$result ) {
+
+        print join ( "\t", @{ $row } ) . "\n";
     }
 }
