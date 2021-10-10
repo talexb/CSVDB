@@ -1,0 +1,74 @@
+#!perl
+
+use strict;
+use warnings;
+
+#  2021-1010: Command line interface to the CSVDB module.
+
+use Term::ReadLine;
+
+my $base_prompt = 'csvdb > ';
+my $prompt = $base_prompt;      #  Might show currently loaded file?
+
+my $done = 0;
+
+my %cmds = (
+    'q' => { exec => sub { $done = 1; },  short => 'Quit csvdb command line' },
+    'h' => { exec => sub { help(); },     short => 'Show help' },
+    'o' => { exec => sub { &open_file; }, short => 'Open CSV file' },
+);
+
+{
+    my $term = Term::ReadLine->new('csvdb');
+
+    print $prompt;
+    my $input;
+
+    while ( defined( $input = $term->readline($prompt) ) ) {
+
+        # $input =~ s/\s+$//;
+
+        print "DEBUG: input: $input\n";
+
+        my @words = split( / /, $input );
+        my $cmd = shift @words;
+
+        if ( exists $cmds{ $cmd } ) {
+
+            &{ $cmds{ $cmd }->{ exec } }( [ @words ] );
+
+        } else {
+
+            print "ERROR: Didn't recognize the $cmd command.\n";
+        }
+
+        last if ($done);
+    }
+}
+
+sub help
+{
+    print join( "\n", map { "$_ : $cmds{$_}->{short}"; } sort keys %cmds )
+      . "\n";
+}
+
+sub open_file
+{
+    my ( $array_ref ) = @_;
+    my $filename = $array_ref->[0];
+    
+    if ( !defined ( $filename ) ) {
+
+        print "ERROR: Must specify a CSV filename\n";
+        return;
+    }
+
+    if ( -e $filename ) {
+
+        print "INFO: Hey, $filename exists! Cool.\n";
+
+    } else {
+
+        print "Warn: Ugh, the file $filename doesn't exist.\n";
+    }
+}
