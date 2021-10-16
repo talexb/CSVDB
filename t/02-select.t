@@ -15,7 +15,7 @@ use CSVDB;
 {
     #  Create an object using our test file;
 
-    my $shapes = CSVDB->new ( "$Bin/Shapes-2021-1008.csv" );
+    my $shapes = CSVDB->new ( "$Bin/Shapes-2021-1008.csv", 1 );
     ok ( defined $shapes, 'Test file opened' );
 
     #  Get data from each of the fields ..

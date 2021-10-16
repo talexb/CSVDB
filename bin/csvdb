@@ -16,9 +16,16 @@ my $done = 0;
 my $table;
 
 my %cmds = (
-    'q' => { exec => sub { $done = 1; },  short => 'Quit csvdb command line' },
-    'h' => { exec => sub { help(); },     short => 'Show help' },
-    'o' => { exec => sub { &open_file; }, short => 'Open CSV file' },
+    'q' => { exec => sub { $done = 1; }, short => 'Quit csvdb command line' },
+    'h' => { exec => sub { help(); },    short => 'Show help' },
+    'o' => {
+        exec  => sub { my ($param) = @_; open_file( $param->[0], 1 ); },
+        short => 'Open CSV file with header'
+    },
+    'op' => {
+        exec  => sub { my ($param) = @_; open_file( $param->[0], 0 ); },
+        short => 'Open CSV file without header (plain)'
+    },
 );
 
 my %sql = (
@@ -70,8 +77,7 @@ sub help
 
 sub open_file
 {
-    my ( $array_ref ) = @_;
-    my $filename = $array_ref->[0];
+    my ( $filename, $header_present ) = @_;
     
     if ( !defined ( $filename ) ) {
 
@@ -82,7 +88,8 @@ sub open_file
     if ( -e $filename ) {
 
         print "INFO: Hey, $filename exists! Cool.\n";
-        $table = CSVDB->new ( $filename );
+
+        $table = CSVDB->new($filename, $header_present);
 
         if ( defined $table ) {
 
