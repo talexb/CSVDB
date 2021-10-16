@@ -16,9 +16,16 @@ my $done = 0;
 my $table;
 
 my %cmds = (
-    'q' => { exec => sub { $done = 1; },  short => 'Quit csvdb command line' },
-    'h' => { exec => sub { help(); },     short => 'Show help' },
-    'o' => { exec => sub { &open_file; }, short => 'Open CSV file' },
+    'q'  => { exec => sub { $done = 1; }, short => 'Quit csvdb command line' },
+    'h'  => { exec => sub { help(); },    short => 'Show help' },
+    'o' => {
+        exec  => sub { &open_file; },
+        short => 'Open CSV file with a header'
+    },
+    'ow' => {
+        exec  => sub { &open_file_without_header; },
+        short => 'Open CSV file without a header'
+    },
 );
 
 my %sql = (
@@ -83,6 +90,33 @@ sub open_file
 
         print "INFO: Hey, $filename exists! Cool.\n";
         $table = CSVDB->new ( $filename );
+
+        if ( defined $table ) {
+
+            print "INFO: Cool, object successfully created.\n";
+
+        } else {
+
+            print "ERROR: Ugh, problems: " . join ( "\n", @CSVDB::errors ) . "\n";
+        }
+    }
+}
+
+sub open_file_without_header
+{
+    my ( $array_ref ) = @_;
+    my $filename = $array_ref->[0];
+    
+    if ( !defined ( $filename ) ) {
+
+        print "ERROR: Must specify a CSV filename\n";
+        return;
+    }
+
+    if ( -e $filename ) {
+
+        print "INFO: Hey, $filename exists! Cool.\n";
+        $table = CSVDB->new_no_header ( $filename );
 
         if ( defined $table ) {
 

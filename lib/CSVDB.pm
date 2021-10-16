@@ -122,6 +122,10 @@ sub select
 {
     my ( $self, %args )  = @_;
 
+#  Hmm .. we know when a file is opened whether it's with or without a header,
+#  which means we don't need separate fields and field_num arguments. They can
+#  all be fields. That means I have some retrofit work to do.
+
     $errors = [];
 
     #  When there are no fields, field numbers, clauses or limits, we just
