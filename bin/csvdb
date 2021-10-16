@@ -133,7 +133,56 @@ sub select
 {
     my ( @params ) = @_;
 
-    my $result = $table->select ( fields => @params );
+    if ( !defined $table ) {
+
+        print "ERROR: Oops, you need to open a CSV file first.\n";
+        return;
+    }
+
+    #  The params can have a field list, separated by commas, and optinally a
+    #  where clause and a limit clause (for now). Let's see if we can catch all
+    #  of those eventualities.
+
+    print "DEBUG: params are " . join ( ' / ', @{$params[0]} ) . "\n";
+
+    #  Field list ..
+
+    my @fields;
+    while ( my $p  = shift @{ $params[0] } ) {
+
+        print "DEBUG: Look at '$p'\n";
+
+        if ( $p =~ /,/ ) {
+
+            push( @fields, split( /,\s*/, $p ) );
+
+        } else {
+
+            if ( $p =~ /\w/ ) { push( @fields, $p ); last; }
+        }
+    }
+
+    print "DEBUG: Fields are " . join ( ' / ', @fields ) . "\n";
+
+    my %args = ( fields => \@fields );
+
+    print "DEBUG: remaining params are " . join ( ' / ', @{$params[0]} ) . "\n";
+
+    #  Where clause (to come) ..
+
+    #  Limit clause ..
+
+    if ( $params[0]->[0] eq 'limit' ) {
+
+        print "DEBUG: Limit is $params[0]->[1]\n";
+        $args{ limit } = $params[0]->[1];
+
+        my $used = shift @{ $params[0] };
+    }
+
+    print "DEBUG: remaining params are " . join ( ' / ', @{$params[0]} ) . "\n";
+
+    my $result = $table->select ( %args );
 
     foreach my $row ( @$result ) {
 
