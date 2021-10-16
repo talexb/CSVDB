@@ -26,7 +26,7 @@ use CSVDB;
 
     #  Create an object using our test file ..
 
-    my $shapes = CSVDB->new ( "$Bin/Shapes-2021-1008.csv" );
+    my $shapes = CSVDB->new ( "$Bin/Shapes-2021-1008.csv", 1 );
     ok ( defined $shapes, 'Test file opened' );
 
     #  .. and just do a select on everything, so we can verify the data.

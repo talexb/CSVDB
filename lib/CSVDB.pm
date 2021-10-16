@@ -58,7 +58,7 @@ if you don't export anything, such as for a purely object-oriented module.
 
 sub new
 {
-    my ( $class, $filename ) = @_;
+    my ( $class, $filename, $header_present ) = @_;
     defined $filename or croak "Must specify filename";
 
     $errors = [];
@@ -66,25 +66,7 @@ sub new
     open ( my $fh, '<', $filename );
     my $self = { filename => $filename };
 
-    _load ( $self, $fh, 1 );
-
-    close ( $fh );
-
-    bless $self, $class;
-    return $self;
-}
-
-sub new_no_header
-{
-    my ( $class, $filename ) = @_;
-    defined $filename or croak "Must specify filename";
-
-    $errors = [];
-
-    open ( my $fh, '<', $filename );
-    my $self = { filename => $filename };
-
-    _load ( $self, $fh, 0 );
+    _load ( $self, $fh, $header_present );
 
     close ( $fh );
 
@@ -126,17 +108,18 @@ sub select
 #  which means we don't need separate fields and field_num arguments. They can
 #  all be fields. That means I have some retrofit work to do.
 
+#  OK .. if the file was opened with a header, then we allow access by the
+#  field name or by field number. If the field was opened without a header,
+#  then field number only. And they should be interchangeable.
+
     $errors = [];
 
-    #  When there are no fields, field numbers, clauses or limits, we just
-    #  return everything.
+    #  When there are no fields, clauses or limits, we just return everything.
 
     if (   !exists( $args{fields} )
-        && !exists( $args{field_num} )
         && !exists $args{where}
         && !exists $args{limit} )
     {
-
         return ( $self->{data} );
     }
 
@@ -153,28 +136,28 @@ sub select
 
         foreach my $name ( @{ $args{ fields } } ) {
 
-            if ( exists $cnames{$name} ) {
+            #  If the field looks like a number .. that's simple. otherwise,
+            #  look for it in the cnames hashref.
+
+            if ( $name =~ /^\d+$/ ) {
+
+                if ( $name > scalar( @{ $self->{data}->[0] } ) ) {
+
+                    push( @errors, "Field $name not found in table" );
+
+                } else {
+
+                    push( @field_offsets, $name - 1 );
+                }
+            }
+
+            elsif ( exists $cnames{$name} ) {
 
                 push( @field_offsets, $cnames{$name} );
 
             } else {
 
                 push( @errors, "Field $name not found in table" );
-            }
-        }
-    }
-
-    elsif ( exists ( $args{ field_num } ) ) {
-
-        foreach my $field_num ( @{ $args{ field_num } } ) {
-
-            if ( $field_num > scalar ( @{ $self->{ data }->[0] } ) ) {
-
-                push ( @errors, "Field $field_num not found in table" );
-
-            } else {
-
-                push ( @field_offsets, $field_num-1 );
             }
         }
     }

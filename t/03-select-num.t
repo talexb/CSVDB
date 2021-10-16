@@ -19,14 +19,14 @@ use CSVDB;
     #  Create an object using our test file; this file has no header, so the
     #  tests use a one-based column number.
 
-    my $shapes = CSVDB->new_no_header ( "$Bin/Shapes-2021-1008-no-header.csv" );
+    my $shapes = CSVDB->new ( "$Bin/Shapes-2021-1008-no-header.csv", 0 );
     ok ( defined $shapes, 'Test file opened' );
 
     #  Get data from each of the fields ..
 
     foreach my $field_num (1..2) {
 
-        my $data = $shapes->select( field_num => [$field_num] );
+        my $data = $shapes->select( fields => [$field_num] );
         ok ( defined $data, 'Got a result' );
 
         is( scalar( @{$data} ), 7, "Field count correct for $field_num" );
@@ -46,7 +46,7 @@ use CSVDB;
 
     #  .. and then try getting data from a field that doesn't exist.
 
-    my $data = $shapes->select( field_num => [ 4 ] );
+    my $data = $shapes->select( fields => [ 4 ] );
     ok ( !defined $data, 'Got null result for bad field number' );
     like ( $CSVDB::errors->[0], qr/Field \d+ not found/, 'Got a good error message' );
 
@@ -54,7 +54,7 @@ use CSVDB;
     #  content as when we ask for everything.
 
     my $all_rows          = $shapes->select;
-    my $explicit_all_rows = $shapes->select( field_num => [1..2] );
+    my $explicit_all_rows = $shapes->select( fields => [1..2] );
 
     is_deeply( $explicit_all_rows, $all_rows,
         'Match for implicit and explicit rows' );
@@ -70,7 +70,7 @@ use CSVDB;
     #  Test order by alpha. We clone the data so we can sort the copy without
     #  affecting the original data.
 
-    my $alpha_order = $shapes->select( field_num => [ 1..2 ], order_by_alpha => 2 );
+    my $alpha_order = $shapes->select( fields => [ 1..2 ], order_by_alpha => 2 );
     my $alpha_copy = clone ( $alpha_order );
     $alpha_copy = [ sort { $a->[ 1 ] cmp $b->[ 1 ] } @{$alpha_copy} ];
 
