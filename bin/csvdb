@@ -5,7 +5,10 @@ use warnings;
 
 #  2021-1010: Command line interface to the CSVDB module.
 
+#  2021-1016: Make it run from the command line or interactively.
+
 use Term::ReadLine;
+use Getopt::Long;
 
 use CSVDB;
 
@@ -29,9 +32,40 @@ my %cmds = (
 );
 
 my %sql = (
-    'select' => { exec => sub { &select; }, short => 'Select records' },
+    'select' => { exec => sub { &sql_select; }, short => 'Select records' },
 );
 
+my $filename;   # CSV filename
+my $cmd_line;   # SQL command line
+
+{
+    if ( @ARGV ) {
+
+        print "DEBUG: ARGV is " . join ( ' / ', @ARGV ) . "\n";
+
+        GetOptions ( '0|open=s' => \$filename, 'E|execute=s' => \$cmd_line );
+
+        if ( !defined $filename ) { print "ERROR: Must specify a filename.\n"; exit; }
+        if ( !defined $cmd_line ) { print "ERROR: Must specify a command line,\n"; exit; }
+
+        print "INFO: OK, we got a filename '$filename' and a command line '$cmd_line'.\n";
+
+        open_file ( $filename, 1 );
+        my @params = split ( / /, $cmd_line );
+
+        my $cmd = shift @params;
+        if ( $cmd eq 'select' ) {
+
+            sql_select ( \@params );    #  Ugh .. why so much indirection?
+        }
+
+    } else {
+
+        run_interactively();
+    }
+}
+
+sub run_interactively
 {
     my $term = Term::ReadLine->new('csvdb');
 
@@ -129,7 +163,7 @@ sub open_file_without_header
     }
 }
 
-sub select
+sub sql_select
 {
     my ( @params ) = @_;
 
@@ -166,13 +200,14 @@ sub select
 
     my %args = ( fields => \@fields );
 
-    print "DEBUG: remaining params are " . join ( ' / ', @{$params[0]} ) . "\n";
+    if ( scalar $params[0]->[0] )
+    { print "DEBUG: 202 remaining params are " . join ( ' / ', @{$params[0]} ) . "\n"; }
 
     #  Where clause (to come) ..
 
     #  Limit clause ..
 
-    if ( $params[0]->[0] eq 'limit' ) {
+    if ( defined $params[0]->[0] && $params[0]->[0] eq 'limit' ) {
 
         print "DEBUG: Limit is $params[0]->[1]\n";
         $args{ limit } = $params[0]->[1];
@@ -180,7 +215,8 @@ sub select
         my $used = shift @{ $params[0] };
     }
 
-    print "DEBUG: remaining params are " . join ( ' / ', @{$params[0]} ) . "\n";
+    if ( scalar $params[0]->[0] )
+    { print "DEBUG: 217 remaining params are " . join ( ' / ', @{$params[0]} ) . "\n"; }
 
     my $result = $table->select ( %args );
 
