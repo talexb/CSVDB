@@ -50,7 +50,7 @@ my $cmd_line;   # SQL command line
         if ( !defined $filename ) { print "ERROR: Must specify a filename.\n"; exit; }
         if ( !defined $cmd_line ) { print "ERROR: Must specify a command line,\n"; exit; }
 
-        print "INFO: OK, we got a filename '$filename' and a command line '$cmd_line'.\n";
+        print "DEBUG: OK, we got a filename '$filename' and a command line '$cmd_line'.\n";
 
         open_file ( $filename, 1 );
         my @params = split ( / /, $cmd_line );
@@ -172,12 +172,16 @@ sub sql_select
 
     print "DEBUG: Fields are " . join ( ' / ', @fields ) . "\n";
 
-    my %args = ( fields => \@fields );
+    #  A 'select *' means we're getting everything .. so we don't need the
+    #  fields parameter at all.
+
+    my %args;
+    if ( @fields ) { %args = ( fields => \@fields );}
 
     if ( scalar @$params )
     { print "DEBUG: 202 remaining params are " . join ( ' / ', @$params ) . "\n"; }
 
-    #  Where clause (to come) ..
+    #  Order by clause (to come) ..
 
     #  Limit clause ..
 

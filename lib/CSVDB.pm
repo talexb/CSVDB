@@ -186,7 +186,15 @@ sub select
 
     foreach my $row ( @{ $self->{data} } ) {
 
-        push( @data, [ map { $row->[$_] } @field_offsets ] );
+        if (@field_offsets) {
+
+            push( @data, [ map { $row->[$_] } @field_offsets ] );
+
+        } else {
+
+            push( @data, $row );
+        }
+
         if ( $limit ) {
 
             last if ( --$limit == 0 );
