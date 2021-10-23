@@ -5,7 +5,6 @@ use strict;
 use warnings;
 
 use Test::More;
-use Try::Tiny;
 use FindBin qw/$Bin/;   #  For test file location
 
 {
