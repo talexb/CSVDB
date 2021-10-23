@@ -160,17 +160,22 @@ sub sql_select
 
         print "DEBUG: Look at '$p'\n";
 
+        #  We're looking at a list of fields separated by commas (ignoring
+        #  spaces), and the list could also be just a single item, which is
+        #  where we stop parsing.
+
         if ( $p =~ /,/ ) {
 
             push( @fields, split( /,\s*/, $p ) );
 
         } else {
 
-            if ( $p =~ /\w/ ) { push( @fields, $p ); last; }
+            if    ( $p eq '*' )  { last; }
+            elsif ( $p =~ /\w/ ) { push( @fields, $p ); last; }
         }
     }
 
-    print "DEBUG: Fields are " . join ( ' / ', @fields ) . "\n";
+    print "DEBUG: Fields selected are " . join ( ' / ', @fields ) . "\n";
 
     #  A 'select *' means we're getting everything .. so we don't need the
     #  fields parameter at all. That's detected by having nothing end up in the
