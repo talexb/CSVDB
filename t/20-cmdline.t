@@ -12,18 +12,11 @@ use FindBin qw/$Bin/;   #  For test file location
     my $prog = "$Bin/../bin/csvdb";
     my $filename = 't/Shapes-2021-1008.csv';
 
-    my @result = map { s/\s+$//; $_ } `$prog -o $filename -e 'select *'`;
-    ok ( @result, 'Got some output from the command line call' );
+    #  Load the file .. only needs to be done once.
 
-    my @info_only = grep { /^INFO:/ } @result;
-    like ( $info_only[0], qr/$filename loaded/, 'Saw file loaded message' );
-
-    my @data_only = grep { $_ !~ /:/ } @result;
-    is ( scalar @data_only, 7, 'Got the right number of lines back' );
-
-    open ( my $fh, '<', $filename );
+    open( my $fh, '<', $filename );
     my $line_num = 0;
-    my @data;
+    my @data_from_file;
 
     while (<$fh>) {
 
@@ -31,14 +24,30 @@ use FindBin qw/$Bin/;   #  For test file location
         s/\s+$//;
 
         my @row = split(/,/);
-        push ( @data, \@row );
+        push( @data_from_file, \@row );
     }
-    close ( $fh );
+    close($fh);
 
-    foreach my $n ( 0 .. $line_num - 2 ) {
+    #  Test both '*' (all fields) and '1,2' (all fields, with and without an
+    #  extra space), since they are equivalent in this case.
 
-        my @got = split( /\t/, $data_only[$n] );
-        is_deeply( \@got, $data[$n], "Data for row $n matched" );
+    foreach my $select ('*', '1,2', '1, 2') {
+
+        my @result =
+          map { s/\s+$//; $_ } `$prog -o $filename -e 'select $select'`;
+        ok( @result, 'Got some output from the command line call' );
+
+        my @info_only = grep { /^INFO:/ } @result;
+        like( $info_only[0], qr/$filename loaded/, 'Saw file loaded message' );
+
+        my @data_only = grep { $_ !~ /:/ } @result;
+        is( scalar @data_only, 7, 'Got the right number of lines back' );
+
+        foreach my $n ( 0 .. $line_num - 2 ) {
+
+            my @got = split( /\t/, $data_only[$n] );
+            is_deeply( \@got, $data_from_file[$n], "Data for row $n matched" );
+        }
     }
 
     done_testing;
