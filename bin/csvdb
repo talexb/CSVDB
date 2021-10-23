@@ -117,57 +117,29 @@ sub open_file
     
     if ( !defined ( $filename ) ) {
 
-        print "ERROR: Must specify a CSV filename\n";
+        print "ERROR: A CSV filename must be specified.\n";
         return;
     }
 
     if ( -e $filename ) {
-
-        print "INFO: Hey, $filename exists! Cool.\n";
 
         $table = CSVDB->new($filename, $header_present);
 
         if ( defined $table ) {
 
-            print "INFO: Cool, object successfully created.\n";
+            print "INFO: $filename loaded.\n";
 
         } else {
 
-            print "ERROR: Ugh, problems: " . join ( "\n", @CSVDB::errors ) . "\n";
-        }
-    }
-}
-
-sub open_file_without_header
-{
-    my ( $array_ref ) = @_;
-    my $filename = $array_ref->[0];
-    
-    if ( !defined ( $filename ) ) {
-
-        print "ERROR: Must specify a CSV filename\n";
-        return;
-    }
-
-    if ( -e $filename ) {
-
-        print "INFO: Hey, $filename exists! Cool.\n";
-        $table = CSVDB->new_no_header ( $filename );
-
-        if ( defined $table ) {
-
-            print "INFO: Cool, object successfully created.\n";
-
-        } else {
-
-            print "ERROR: Ugh, problems: " . join ( "\n", @CSVDB::errors ) . "\n";
+            print "ERROR: Ugh, problems loading $filename: "
+              . join( "\n", @CSVDB::errors ) . "\n";
         }
     }
 }
 
 sub sql_select
 {
-    my ( @params ) = @_;
+    my ( $params ) = @_;
 
     if ( !defined $table ) {
 
@@ -179,12 +151,12 @@ sub sql_select
     #  where clause and a limit clause (for now). Let's see if we can catch all
     #  of those eventualities.
 
-    print "DEBUG: params are " . join ( ' / ', @{$params[0]} ) . "\n";
+    print "DEBUG: params are " . join ( ' / ', @$params ) . "\n";
 
     #  Field list ..
 
     my @fields;
-    while ( my $p  = shift @{ $params[0] } ) {
+    while ( my $p  = shift @$params ) {
 
         print "DEBUG: Look at '$p'\n";
 
@@ -202,23 +174,23 @@ sub sql_select
 
     my %args = ( fields => \@fields );
 
-    if ( scalar $params[0]->[0] )
-    { print "DEBUG: 202 remaining params are " . join ( ' / ', @{$params[0]} ) . "\n"; }
+    if ( scalar @$params )
+    { print "DEBUG: 202 remaining params are " . join ( ' / ', @$params ) . "\n"; }
 
     #  Where clause (to come) ..
 
     #  Limit clause ..
 
-    if ( defined $params[0]->[0] && $params[0]->[0] eq 'limit' ) {
+    if ( defined $params->[0] && $params->[0] eq 'limit' ) {
 
-        print "DEBUG: Limit is $params[0]->[1]\n";
-        $args{ limit } = $params[0]->[1];
+        print "DEBUG: Limit is $params->[1]\n";
+        $args{ limit } = $params->[1];
 
-        my $used = shift @{ $params[0] };
+        my $used = shift @$params;
     }
 
-    if ( scalar $params[0]->[0] )
-    { print "DEBUG: 217 remaining params are " . join ( ' / ', @{$params[0]} ) . "\n"; }
+    if ( scalar @$params )
+    { print "DEBUG: 217 remaining params are " . join ( ' / ', @$params ) . "\n"; }
 
     my $result = $table->select ( %args );
 
