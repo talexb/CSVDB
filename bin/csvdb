@@ -1,4 +1,4 @@
-#!perl
+#!/usr/bin/perl
 
 use strict;
 use warnings;
@@ -9,6 +9,8 @@ use warnings;
 
 use Term::ReadLine;
 use Getopt::Long;
+
+use lib './lib';
 
 use CSVDB;
 
