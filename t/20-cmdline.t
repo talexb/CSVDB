@@ -28,10 +28,11 @@ use FindBin qw/$Bin/;   #  For test file location
     }
     close($fh);
 
-    #  Test both '*' (all fields) and '1,2' (all fields, with and without an
-    #  extra space), since they are equivalent in this case.
+    #  Test '*' (all fields), '1,2' (all fields, with and without an
+    #  extra space) and 'sides,name' (all fields -- by name, with and without
+    #  an extra space) since they are equivalent in this case.
 
-    foreach my $select ('*', '1,2', '1, 2') {
+    foreach my $select ('*', '1,2', '1, 2', 'sides,name', 'sides, name') {
 
         my @result =
           map { s/\s+$//; $_ } `$prog -o $filename -e 'select $select'`;
