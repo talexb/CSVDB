@@ -30,6 +30,11 @@ Perhaps a little code snippet.
 
     use CSVDB;
 
+    #  The shapes.csv file has data like
+    #       3,triangle
+    #       4,square
+    #       .. and so on.
+
     my $shapes = CSVDB->new( 'shapes.csv' );
     my $sides = $shapes->select( fields => 'sides' );
 
@@ -64,7 +69,7 @@ sub new
     $errors = [];
 
     open ( my $fh, '<', $filename );
-    my $self = { filename => $filename };
+    my $self = { filename => $filename, header_present => 0 };
 
     _load ( $self, $fh, $header_present );
 
@@ -85,12 +90,13 @@ sub _load
     my $csv = Text::CSV->new ({ binary => 1, auto_diag => 1 });
     while ( my $row = $csv->getline ($fh)) {
 
-        #  We're assuming that the first line will be the column headers (i.e.,
-        #  field names), and all subsequent lines will be data.
+        #  If the header's present, save that info in the object. Otherwise,
+        #  it's a line of data, to be saved.
 
         if ( $header_present ) {
 
             $self->{cnames} = $row;
+            $self->{header_present} = $header_present;
             $header_present = 0;
 
         } else {
@@ -171,7 +177,7 @@ sub select
         return undef;
     }
 
-    #  Collect the data and return it. If there's a limit, do that.
+    #  Collect the data, and if there's a limit, follow it.
 
     my @data;
     my $limit = 0;
@@ -187,31 +193,34 @@ sub select
         }
     }
 
-    #  Is the data supposed to be sorted? (Just handle sorted a single field
-    #  for now.) (Also, order by needs to know if we're doing alpha sorting
-    #  using cmp or numeric sorting using <=> -- hence order_by_alpha.)
+    #  If we're sorting, we can do by name or by field number if the header is
+    #  present, and just by field number if not. We're assuming we don't have a
+    #  pathological case where there's a set of titles that are .. just numbers
+    #  .. that don't match the column numbers.
 
-    if ( exists( $args{fields} ) ) {
+    if ( exists $args{order_by_alpha} ) {
 
-        my $off    = 0;    #  Maps the output field names to offset.
-        my %onames = map { $_ => $off++ } @{ $args{fields} };
+        my $sort_offset;
+        if ( $self->{header_present} ) {
 
-        if ( exists $args{order_by_alpha} ) {
+            if ( $args{order_by_alpha} =~ /^\d+$/ ) {
 
-            #  TODO: Check that this is a valid field name.
-            my $offset = $onames{ $args{order_by_alpha} };
-            @data = sort { $a->[$offset] cmp $b->[$offset] } @data;
+                $sort_offset = $args{order_by_alpha} - 1;
+
+            } else {
+
+                my $off    = 0;    #  Maps the output field names to offset.
+                my %onames = map { $_ => $off++ } @{ $args{fields} };
+
+                $sort_offset = $onames{ $args{order_by_alpha} };
+            }
+
+        } else {
+
+            $sort_offset = $args{order_by_alpha} - 1;
         }
-    }
 
-    elsif ( exists ( $args{ field_num } ) ) {
-
-        if ( exists $args{order_by_alpha} ) {
-
-            #  TODO: Check that this is a valid field number.
-            my $offset = $args{order_by_alpha} - 1;
-            @data = sort { $a->[$offset] cmp $b->[$offset] } @data;
-        }
+        @data = sort { $a->[$sort_offset] cmp $b->[$sort_offset] } @data;
     }
 
     return ( \@data );
