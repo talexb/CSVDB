@@ -156,7 +156,7 @@ sub sql_select
     #  Field list ..
 
     my @fields;
-    while ( my $p  = shift @$params ) {
+    while ( my $p = shift @$params ) {
 
         print "DEBUG: Look at '$p'\n";
 
@@ -173,7 +173,8 @@ sub sql_select
     print "DEBUG: Fields are " . join ( ' / ', @fields ) . "\n";
 
     #  A 'select *' means we're getting everything .. so we don't need the
-    #  fields parameter at all.
+    #  fields parameter at all. That's detected by having nothing end up in the
+    #  'fields' array.
 
     my %args;
     if ( @fields ) { %args = ( fields => \@fields );}
@@ -187,10 +188,12 @@ sub sql_select
 
     if ( defined $params->[0] && $params->[0] eq 'limit' ) {
 
-        print "DEBUG: Limit is $params->[1]\n";
-        $args{ limit } = $params->[1];
-
         my $used = shift @$params;
+
+        print "DEBUG: Limit is $params->[0]\n";
+        $args{ limit } = $params->[0];
+
+        $used = shift @$params;
     }
 
     if ( scalar @$params )
