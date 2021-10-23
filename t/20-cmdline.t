@@ -12,7 +12,7 @@ use FindBin qw/$Bin/;   #  For test file location
     my $prog = "$Bin/../bin/csvdb";
     my $filename = 't/Shapes-2021-1008.csv';
 
-    my @result = `$prog -o $filename -e 'select *'`;
+    my @result = map { s/\s+$//; $_ } `$prog -o $filename -e 'select *'`;
     ok ( @result, 'Got some output from the command line call' );
 
     my @info_only = grep { /^INFO:/ } @result;
@@ -28,6 +28,8 @@ use FindBin qw/$Bin/;   #  For test file location
     while (<$fh>) {
 
         next if ( $line_num++ == 0 );
+        s/\s+$//;
+
         my @row = split(/,/);
         push ( @data, \@row );
     }
