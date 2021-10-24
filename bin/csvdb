@@ -14,6 +14,8 @@ use lib './lib';
 
 use CSVDB;
 
+my $debug = 0;      #  Enable debug messages here.
+
 my $base_prompt = 'csvdb > ';
 my $prompt = $base_prompt;      #  Might show currently loaded file?
 
@@ -43,14 +45,16 @@ my $cmd_line;   # SQL command line
 {
     if ( @ARGV ) {
 
-        print "DEBUG: ARGV is " . join ( ' / ', @ARGV ) . "\n";
+        if ( $debug )
+        { print "DEBUG: ARGV is " . join ( ' / ', @ARGV ) . "\n"; }
 
         GetOptions ( '0|open=s' => \$filename, 'E|execute=s' => \$cmd_line );
 
-        if ( !defined $filename ) { print "ERROR: Must specify a filename.\n"; exit; }
-        if ( !defined $cmd_line ) { print "ERROR: Must specify a command line,\n"; exit; }
+        if ( !defined $filename ) { print STDERR "ERROR: Must specify a filename.\n"; exit; }
+        if ( !defined $cmd_line ) { print STDERR "ERROR: Must specify a command line,\n"; exit; }
 
-        print "DEBUG: OK, we got a filename '$filename' and a command line '$cmd_line'.\n";
+        if ( $debug )
+        { print "DEBUG: OK, we got a filename '$filename' and a command line '$cmd_line'.\n"; }
 
         open_file ( $filename, 1 );
         my @params = split ( / /, $cmd_line );
@@ -78,7 +82,8 @@ sub run_interactively
 
         # $input =~ s/\s+$//;
 
-        print "DEBUG: input: $input\n";
+        if ( $debug )
+        { print "DEBUG: input: $input\n"; }
 
         my @words = split( / /, $input );
         my $cmd = shift @words;
@@ -98,7 +103,7 @@ sub run_interactively
 
         } else {
 
-            print "ERROR: Didn't recognize the $cmd command.\n";
+            print STDERR "ERROR: Didn't recognize the $cmd command.\n";
         }
 
         last if ($done);
@@ -117,7 +122,7 @@ sub open_file
     
     if ( !defined ( $filename ) ) {
 
-        print "ERROR: A CSV filename must be specified.\n";
+        print STDERR "ERROR: A CSV filename must be specified.\n";
         return;
     }
 
@@ -127,11 +132,11 @@ sub open_file
 
         if ( defined $table ) {
 
-            print "INFO: $filename loaded.\n";
+            print STDERR "INFO: $filename loaded.\n";
 
         } else {
 
-            print "ERROR: Ugh, problems loading $filename: "
+            print STDERR "ERROR: Ugh, problems loading $filename: "
               . join( "\n", @CSVDB::errors ) . "\n";
         }
     }
@@ -143,7 +148,7 @@ sub sql_select
 
     if ( !defined $table ) {
 
-        print "ERROR: Oops, you need to open a CSV file first.\n";
+        print STDERR "ERROR: Oops, you need to open a CSV file first.\n";
         return;
     }
 
@@ -151,14 +156,16 @@ sub sql_select
     #  where clause and a limit clause (for now). Let's see if we can catch all
     #  of those eventualities.
 
-    print "DEBUG: params are " . join ( ' / ', @$params ) . "\n";
+    if ( $debug )
+    { print "DEBUG: params are " . join ( ' / ', @$params ) . "\n"; }
 
     #  Field list ..
 
     my @fields;
     while ( my $p = shift @$params ) {
 
-        print "DEBUG: Look at '$p'\n";
+        if ( $debug )
+        { print "DEBUG: Look at parameter '$p'\n"; }
 
         #  We're looking at a list of fields separated by commas (ignoring
         #  spaces), and the list could also be just a single item, which is
@@ -175,7 +182,14 @@ sub sql_select
         }
     }
 
-    print "DEBUG: Fields selected are " . join ( ' / ', @fields ) . "\n";
+    if ( $debug ) {
+        if (@fields) {
+            print "DEBUG: Fields selected are " . join( ' / ', @fields ) . "\n";
+        }
+        else {
+            print "DEBUG: All fields selected.\n";
+        }
+    }
 
     #  A 'select *' means we're getting everything .. so we don't need the
     #  fields parameter at all. That's detected by having nothing end up in the
@@ -184,8 +198,9 @@ sub sql_select
     my %args;
     if ( @fields ) { %args = ( fields => \@fields );}
 
+    if ( $debug ) {
     if ( scalar @$params )
-    { print "DEBUG: 202 remaining params are " . join ( ' / ', @$params ) . "\n"; }
+    { print "DEBUG: 193 remaining parameters are " . join ( ' / ', @$params ) . "\n"; } }
 
     #  Order by clause (to come) ..
 
@@ -195,14 +210,16 @@ sub sql_select
 
         my $used = shift @$params;
 
-        print "DEBUG: Limit is $params->[0]\n";
+        if ( $debug )
+        { print "DEBUG: Limit is $params->[0]\n"; }
         $args{ limit } = $params->[0];
 
         $used = shift @$params;
     }
 
+    if ( $debug ) {
     if ( scalar @$params )
-    { print "DEBUG: 217 remaining params are " . join ( ' / ', @$params ) . "\n"; }
+    { print "DEBUG: 210 remaining parameters are " . join ( ' / ', @$params ) . "\n"; } }
 
     my $result = $table->select ( %args );
 

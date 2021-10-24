@@ -35,7 +35,7 @@ use FindBin qw/$Bin/;   #  For test file location
         #  Run the command, and do all of the usual checks ..
 
         my @result = map { s/\s+$//; $_ }
-          `$prog -o $filename -e 'select * limit $limit'`;
+          `$prog 2>&1 -o $filename -e 'select * limit $limit'`;
         ok( @result, "Got some output from the command line call" );
 
         my @info_only = grep { /^INFO:/ } @result;

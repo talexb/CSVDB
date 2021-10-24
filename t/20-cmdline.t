@@ -34,7 +34,7 @@ use FindBin qw/$Bin/;   #  For test file location
     foreach my $select ('*', '1,2', '1, 2', 'sides,name', 'sides, name') {
 
         my @result =
-          map { s/\s+$//; $_ } `$prog -o $filename -e 'select $select'`;
+          map { s/\s+$//; $_ } `$prog 2>&1 -o $filename -e 'select $select'`;
         ok( @result, 'Got some output from the command line call' );
 
         my @info_only = grep { /^INFO:/ } @result;

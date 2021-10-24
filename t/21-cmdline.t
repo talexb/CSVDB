@@ -31,7 +31,7 @@ use FindBin qw/$Bin/;   #  For test file location
 
     foreach my $col ( 1 .. 2 ) {
 
-        my @result = map { s/\s+$//; $_ } `$prog -o $filename -e 'select $col'`;
+        my @result = map { s/\s+$//; $_ } `$prog 2>&1 -o $filename -e 'select $col'`;
         ok( @result,
             "Got some output from the command line call / column $col" );
 
