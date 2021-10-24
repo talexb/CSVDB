@@ -147,7 +147,7 @@ sub sql_select
         return;
     }
 
-    #  The params can have a field list, separated by commas, and optinally a
+    #  The params can have a field list, separated by commas, and optionally a
     #  where clause and a limit clause (for now). Let's see if we can catch all
     #  of those eventualities.
 
