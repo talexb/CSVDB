@@ -1,2 +1,5 @@
 */.*sw?
 cover_db/*
+blib/*
+CSVDB-*/*
+*.sw?
