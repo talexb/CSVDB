@@ -1,0 +1,68 @@
+{
+   "abstract" : "Access a CSV file like a database",
+   "author" : [
+      "T. Alex Beamish, C<< <talexb at gmail.com> >>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Minilla/v3.1.12, CPAN::Meta::Converter version 2.150010",
+   "license" : [
+      "artistic_2"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : 2
+   },
+   "name" : "CSVDB",
+   "no_index" : {
+      "directory" : [
+         "t",
+         "xt",
+         "inc",
+         "share",
+         "eg",
+         "examples",
+         "author",
+         "builder"
+      ]
+   },
+   "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "Module::Build::Tiny" : "0.035"
+         }
+      },
+      "develop" : {
+         "requires" : {
+            "Test::CPAN::Meta" : "0",
+            "Test::MinimumVersion::Fast" : "0.04",
+            "Test::PAUSE::Permissions" : "0.07",
+            "Test::Pod" : "1.41",
+            "Test::Spellunker" : "v0.2.7"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Text::CSV" : "0",
+            "perl" : "5.006"
+         }
+      }
+   },
+   "release_status" : "unstable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/talexb/CSVDB/issues"
+      },
+      "homepage" : "https://github.com/talexb/CSVDB",
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/talexb/CSVDB.git",
+         "web" : "https://github.com/talexb/CSVDB"
+      }
+   },
+   "version" : "0.01",
+   "x_contributors" : [
+      "Alex Beamish <talexb@gmail.com>"
+   ],
+   "x_serialization_backend" : "JSON::PP version 4.02",
+   "x_static_install" : 1
+}
