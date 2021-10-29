@@ -55,7 +55,27 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =head1 SUBROUTINES/METHODS
 
-=head2 function1
+=head2 new
+
+Create a new CSVDB object. Expects a filename and a boolean reflecting whether
+there's a header present that describes each column.
+
+=head2 select
+
+Performs a select operation on the CSVDB object. Possible arguments are
+
+=over 4
+
+=item fields: A list of either field names or of field numbers (one-based)
+
+=item where: A simple condition that limits or filters rows (not yet implemented).
+
+=item limit: An upper limit on the number of rows return.
+
+=back
+
+An arrayref of results is returned; if there are errors, they can be found in
+the arrayref $CSVDB::errors.
 
 =cut
 
