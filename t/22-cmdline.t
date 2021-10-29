@@ -8,7 +8,7 @@ use Test::More;
 use FindBin qw/$Bin/;   #  For test file location
 
 {
-    my $prog = "$Bin/../bin/csvdb";
+    my $prog = "$Bin/../script/csvdb";
     my $filename = 't/Shapes-2021-1008.csv';
 
     #  Load the file .. only needs to be done once.
