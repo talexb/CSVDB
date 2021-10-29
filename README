@@ -5,6 +5,9 @@ A test module to access CSV files as if they were database tables.
 Open a CSVDB object by supplying the name of a CSV file, and then use select,
 insert, update and delete to read and write the CSV.
 
+Use the command line utility csvdb to either look at CSV files interactively,
+or do things with them by providing command line arguments.
+
 INSTALLATION
 
 To install this module, run the following commands:
@@ -13,6 +16,9 @@ To install this module, run the following commands:
 	make
 	make test
 	make install
+
+This is version 0.01 -- so an improvement to this would be to copy the command
+line script csvdb to the user's bin directory. To come.
 
 SUPPORT AND DOCUMENTATION
 
