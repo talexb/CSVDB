@@ -4,7 +4,7 @@ CSVDB - Access a CSV file like a database
 
 # VERSION
 
-Version 0.01
+Version 0.02
 
 # SYNOPSIS
 
@@ -39,7 +39,21 @@ if you don't export anything, such as for a purely object-oriented module.
 
 # SUBROUTINES/METHODS
 
-## function1
+## new
+
+Create a new CSVDB object. Expects a filename and a boolean reflecting whether
+there's a header present that describes each column.
+
+## select
+
+Performs a select operation on the CSVDB object. Possible arguments are
+
+- fields: A list of either field names or of field numbers (one-based)
+- where: A simple condition that limits or filters rows (not yet implemented).
+- limit: An upper limit on the number of rows return.
+
+An arrayref of results is returned; if there are errors, they can be found in
+the arrayref $CSVDB::errors.
 
 # AUTHOR
 
