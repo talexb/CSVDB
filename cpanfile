@@ -1,1 +1,1 @@
-requires 'Text::CSV'
+requires 'Text::CSV' => 0
