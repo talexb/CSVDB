@@ -4,7 +4,7 @@ CSVDB - Access a CSV file like a database
 
 # VERSION
 
-Version 0.02
+Version 0.01
 
 # SYNOPSIS
 

@@ -1,4 +1,4 @@
-#!perl -T
+#!perl
 use 5.006;
 use strict;
 use warnings;
@@ -20,5 +20,7 @@ my $min_pc = 0.18;
 eval "use Pod::Coverage $min_pc";
 plan skip_all => "Pod::Coverage $min_pc required for testing POD coverage"
     if $@;
+
+use lib './lib';
 
 all_pod_coverage_ok();
